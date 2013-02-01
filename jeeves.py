@@ -44,7 +44,8 @@ class MainWindow(QtGui.QWidget):
         
         
         self.calendarWidget = QtGui.QCalendarWidget(self.tab1)
-        self.calendarWidget.setGeometry(QtCore.QRect(340, 20, 380, 250))
+        self.calendarWidget.setGeometry(QtCore.QRect(350, 20, 385, 200))
+        self.calendarWidget.setSelectionMode(QtGui.QCalendarWidget.NoSelection)
         self.calendarWidget.setObjectName("calendarWidget")
         
         # The weatherTemp labels are left invisible (unset) until they're populated
@@ -52,26 +53,25 @@ class MainWindow(QtGui.QWidget):
         # serial connection
         self.currentWeatherBox = QtGui.QGroupBox(self.tab1)
         self.currentWeatherBox.setGeometry(QtCore.QRect(30, 180, 290, 200))
-        font = QtGui.QFont()
-        font.setPointSize(16)
-        self.currentWeatherBox.setFont(font)
         self.currentWeatherBox.setAlignment(QtCore.Qt.AlignCenter)
         self.currentWeatherBox.setObjectName("currentWeatherBox")
         self.outdoorWeatherTemp = QtGui.QLabel(self.currentWeatherBox)
         self.outdoorWeatherTemp.setGeometry(QtCore.QRect(10, 10, 250, 30))
         font = QtGui.QFont()
-        font.setPointSize(16)
+        font.setPointSize(13)
+        font.setFamily("Verdana")
         self.outdoorWeatherTemp.setFont(font)
         self.outdoorWeatherTemp.setObjectName("outdoorWeatherTemp")
         self.indoorWeatherTemp = QtGui.QLabel(self.currentWeatherBox)
         self.indoorWeatherTemp.setGeometry(QtCore.QRect(10, 40, 250, 30))
         font = QtGui.QFont()
-        font.setPointSize(16)
+        font.setPointSize(13)
+        font.setFamily("Verdana")
         self.indoorWeatherTemp.setFont(font)
         self.indoorWeatherTemp.setObjectName("indoorWeatherTemp")
         
         self.fortuneText = QtGui.QTextEdit(self.tab1)
-        self.fortuneText.setGeometry(QtCore.QRect(340, 290, 380, 90))
+        self.fortuneText.setGeometry(QtCore.QRect(350, 290, 385, 90))
         self.fortuneText.setTextInteractionFlags(Qt.TextInteractionFlag(0)) # I don't want any interaction allowed, so the 0 flag is set
         
         self.digitalClock = DigitalClock(self.tab1)
@@ -99,10 +99,10 @@ class MainWindow(QtGui.QWidget):
                 data = msg.split(',')
                 if msg.endswith('*') and msg.startswith('$') and len(data)==11:
                     self.outdoorWeatherTemp.setText('Outdoor Temperature: ' + data[1] + 'F')
-                    print "Debug: Outdoor Temp: " + data[1] + 'F'
+                    #print "Debug: Outdoor Temp: " + data[1] + 'F'
                 elif msg.endswith('*') and msg.startswith('$') and data[3]=="indoor":
                     self.indoorWeatherTemp.setText('Indoor Temperature: ' + data[1] + 'F')
-                    print "Debug: Outdoor Temp: " + data[1] + 'F'
+                    #print "Debug: Outdoor Temp: " + data[1] + 'F'
             except Queue.Empty:
                 pass
     
