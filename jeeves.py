@@ -1,8 +1,17 @@
+####################################################
+# Jeeves v0.1
+# Ian Corbitt, 2013
+#
+# I'm too lazy to read into the licensing bits, so I'll just say
+# that if you use my code, cool, drop me a line
+####################################################
+
 import os, sys, time, threading, Queue
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 import serial
 from digitalClock import DigitalClock
+import ExtendQLabel
 
 ####################################################
 # Variables required
@@ -42,6 +51,13 @@ class MainWindow(QtGui.QWidget):
         self.tab_widget.addTab(self.tab3, "Climate")
         self.tab_widget.addTab(self.tab4, "Security")
         
+        self.slideSwitchOn = QtGui.QPixmap("content/on.png")
+        self.slideSwitchOff = QtGui.QPixmap("content/off.png")
+        self.livingRoomLightsSwitchState = False
+        self.livingRoomLightsSwitchLabel = ExtendQLabel.ExtendedQLabel(self.tab2)
+        self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
+        self.livingRoomLightsSwitchLabel.move(100, 100)
+        self.connect(self.livingRoomLightsSwitchLabel, QtCore.SIGNAL('clicked()'), self.changeSwitchState)
         
         self.calendarWidget = QtGui.QCalendarWidget(self.tab1)
         self.calendarWidget.setGeometry(QtCore.QRect(350, 20, 385, 200))
@@ -86,6 +102,16 @@ class MainWindow(QtGui.QWidget):
         
     def closeEvent(self, ev):
         self.endcommand()
+    
+    def changeSwitchState(self):
+        if self.livingRoomLightsSwitchState == False:
+            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOn))
+            self.livingRoomLightsSwitchState = True
+            print("Set to on")
+        elif self.livingRoomLightsSwitchState == True:
+            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
+            self.livingRoomLightsSwitchState = False
+            print("Set to off")
 
     def processIncoming(self):
         """
