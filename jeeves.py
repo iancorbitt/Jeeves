@@ -1,33 +1,35 @@
-####################################################
+################################################################
 # Jeeves v0.1
 # Ian Corbitt, 2013
 #
 # I'm too lazy to read into the licensing bits, so I'll just say
 # that if you use my code, cool, drop me a line
-####################################################
+################################################################
 
 import os, sys, time, threading, Queue
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import Qt
 import serial
 from digitalClock import DigitalClock
-import ExtendQLabel
+import ExtendedQLabel, systemMonitor, eventProcessor
 
-####################################################
+################################################################
 # Variables required
-####################################################
+################################################################
 # Serial Port Settings
 SERIALPORT = "/dev/tty.usbserial-A700fpRz"
 BAUD = 57600
 # Quote rotation time
 FORTUNETIME = 120000
-####################################################
+################################################################
 # Edit at your own risk below this line
 
 class MainWindow(QtGui.QWidget):
     def __init__(self, queue, endcommand, *args):
         QtGui.QWidget.__init__(self, *args)
         self.queue = queue
+        self.systemStatus = systemMonitor.getSystemStatus(self)
+        print self.systemStatus
         
         # All of the geometry throughout is set for the 7" LCD Cape for the Beaglebone (800x480 resolution)
         
@@ -47,17 +49,21 @@ class MainWindow(QtGui.QWidget):
         self.tab4 = QtGui.QWidget()
               
         self.tab_widget.addTab(self.tab1, "Main")
-        self.tab_widget.addTab(self.tab2, "Automation")
+        self.tab_widget.addTab(self.tab2, "Control")
         self.tab_widget.addTab(self.tab3, "Climate")
         self.tab_widget.addTab(self.tab4, "Security")
         
         self.slideSwitchOn = QtGui.QPixmap("content/on.png")
         self.slideSwitchOff = QtGui.QPixmap("content/off.png")
-        self.livingRoomLightsSwitchState = False
-        self.livingRoomLightsSwitchLabel = ExtendQLabel.ExtendedQLabel(self.tab2)
-        self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
+        self.livingRoomLightsSwitchLabel = ExtendedQLabel.ExtendedQLabel(self.tab2)
         self.livingRoomLightsSwitchLabel.move(100, 100)
         self.connect(self.livingRoomLightsSwitchLabel, QtCore.SIGNAL('clicked()'), self.changeSwitchState)
+        if self.systemStatus['lights']['livingRoom'] == 'on':
+            self.livingRoomLightsSwitchState = True
+            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOn))
+        elif self.systemStatus['lights']['livingRoom'] == 'off':
+            self.livingRoomLightsSwitchState = False
+            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
         
         self.calendarWidget = QtGui.QCalendarWidget(self.tab1)
         self.calendarWidget.setGeometry(QtCore.QRect(350, 20, 385, 200))
@@ -107,10 +113,14 @@ class MainWindow(QtGui.QWidget):
         if self.livingRoomLightsSwitchState == False:
             self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOn))
             self.livingRoomLightsSwitchState = True
+            event = "lightingCon.lightsStatus.livingRoom.on"
+            eventProcessor.processEvent(event)
             print("Set to on")
         elif self.livingRoomLightsSwitchState == True:
             self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
             self.livingRoomLightsSwitchState = False
+            event = "lightingCon.lightsStatus.livingRoom.off"
+            eventProcessor.processEvent(event)
             print("Set to off")
 
     def processIncoming(self):
