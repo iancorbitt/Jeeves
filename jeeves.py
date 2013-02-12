@@ -16,10 +16,14 @@ import ExtendedQLabel, systemMonitor, eventProcessor
 ################################################################
 # Variables required
 ################################################################
-# Serial Port Settings
+# Generic settings
+SETTINGSFILE = "jeeves.conf"
+LOGFILE = "logs/messages"
+ERRORFILE = "logs/errors"
+# Serial port settings
 SERIALPORT = "/dev/tty.usbserial-A700fpRz"
 BAUD = 57600
-# Quote rotation time
+# Quote rotation time (msecs)
 FORTUNETIME = 120000
 ################################################################
 # Edit at your own risk below this line
@@ -111,17 +115,27 @@ class MainWindow(QtGui.QWidget):
     
     def changeSwitchState(self):
         if self.livingRoomLightsSwitchState == False:
-            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOn))
-            self.livingRoomLightsSwitchState = True
             event = "lightingCon.lightsStatus.livingRoom.on"
-            eventProcessor.processEvent(event)
-            print("Set to on")
+            status = eventProcessor.processEvent(self, event)
+            if (status == True):
+                self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOn))
+                self.livingRoomLightsSwitchState = True
+            elif (status == "unable to process"):
+                print "unable to process"
+            else:
+                print "something failed...check the logs"
+            #print("Set to on")
         elif self.livingRoomLightsSwitchState == True:
-            self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
-            self.livingRoomLightsSwitchState = False
             event = "lightingCon.lightsStatus.livingRoom.off"
-            eventProcessor.processEvent(event)
-            print("Set to off")
+            status = eventProcessor.processEvent(self, event)
+            if (status == True):
+                self.livingRoomLightsSwitchLabel.setPixmap(QtGui.QPixmap(self.slideSwitchOff))
+                self.livingRoomLightsSwitchState = False
+            elif (status == "unable to process"):
+                print "unable to process"
+            else:
+                print "something failed...check the logs"
+            #print("Set to off")
 
     def processIncoming(self):
         """

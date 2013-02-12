@@ -1,4 +1,4 @@
 Jeeves
 ======
 
-Beaglebone/Arduino/DigiSpark base home automation system
+Beaglebone/Arduino based home automation system

@@ -11,9 +11,22 @@
 #
 # <station_id>.<request_type>.<event>.<argument(s)>
 #
-# i.e relayCon.doorStatus.door1.open
+# i.e securityCon.doorStatus.door1.open
 #     lightingCon.lightsStatus.bed1.off
 #     lightingCon.lightsStatus.door1.on
 
-def processEvent(event):
+import securityController as secCon, lightingController as lightCon
+
+def processEvent(self, event):
     print "Event received: " + event
+    request = event.split('.')
+    if (request[0] == "lightingCon"):
+        update = lightCon.lightingCon(request)
+        return update
+    elif (request[0] == "securityCon"):
+        update = secCon.securityCon(request)
+        return update
+    else:
+        return "unable to process"
+        print "I don't understand that Dave..."
+        print request
